@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 
 	"go-crm/models"
@@ -13,6 +14,41 @@ import (
 
 var DB *gorm.DB
 
+func GetHome(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("GetHome")
+	tmpl, err := template.New("index").Parse(`
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>API Overview</title>
+		</head>
+		<body>
+			<h1>Welcome to the API</h1>
+			<p>This API provides the following endpoints:</p>
+			<ul>
+				<li><strong>GET /customers</strong>: Get all customers</li>
+				<li><strong>GET /customers/{id}</strong>: Get a specific customer by ID</li>
+				<li><strong>POST /customers</strong>: Create a new customer</li>
+				<li><strong>PUT /customers/{id}</strong>: Update an existing customer</li>
+				<li><strong>DELETE /customers/{id}</strong>: Delete a customer</li>
+			</ul>
+		</body>
+		</html>
+	`)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Execute the template and write the output to the response writer
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
 func GetCustomers(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("GetCustomers")
 	var customers []models.Customer
