@@ -15,8 +15,7 @@ import (
 
 func main() {
 	var err error
-	// dsn := "host=*** user=*** password=*** dbname=go_crm port=5432 sslmode=disable TimeZone=Asia/Shanghai"
-	dsn := "host=localhost user=postgres password=12345678aA@ dbname=go_crm port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+	dsn := "host=*** user=*** password=*** dbname=go_crm port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 	controllers.DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("failed to connect database")
