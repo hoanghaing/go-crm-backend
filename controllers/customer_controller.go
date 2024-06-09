@@ -14,30 +14,51 @@ import (
 var DB *gorm.DB
 
 func GetCustomers(w http.ResponseWriter, r *http.Request) {
-	// fmt.Println("GetCustomers")
+	fmt.Println("GetCustomers")
 	var customers []models.Customer
 	if err := DB.Find(&customers).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// fmt.Println("GetCustomers: ", customers)
-	json.NewEncoder(w).Encode(customers)
+	customersJSON, err := json.Marshal(customers)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(customersJSON)
 }
 
 func GetCustomer(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("GetCustomer")
 	params := mux.Vars(r)
 	var customer models.Customer
 	DB.First(&customer, params["id"])
-	json.NewEncoder(w).Encode(&customer)
+	customerJSON, err := json.Marshal(customer)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(customerJSON)
 }
 
 func CreateCustomer(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("CreateCustomer")
 	var customer models.Customer
-	json.NewDecoder(r.Body).Decode(&customer)
-	DB.Create(&customer)
-	json.NewEncoder(w).Encode(&customer)
+	if err := json.NewDecoder(r.Body).Decode(&customer); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := DB.Create(&customer).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	customerJSON, err := json.Marshal(customer)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(customerJSON)
 }
 
 func UpdateCustomer(w http.ResponseWriter, r *http.Request) {
@@ -45,15 +66,37 @@ func UpdateCustomer(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	var customer models.Customer
 	DB.First(&customer, params["id"])
-	json.NewDecoder(r.Body).Decode(&customer)
-	DB.Save(&customer)
-	json.NewEncoder(w).Encode(&customer)
+	if err := json.NewDecoder(r.Body).Decode(&customer); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := DB.Save(&customer).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	customerJSON, err := json.Marshal(customer)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(customerJSON)
 }
 
 func DeleteCustomer(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("DeleteCustomer")
 	params := mux.Vars(r)
 	var customer models.Customer
-	DB.Delete(&customer, params["id"])
-	json.NewEncoder(w).Encode("Customer Deleted")
+	if err := DB.Delete(&customer, params["id"]).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	response := map[string]string{"message": "Customer Deleted"}
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(responseJSON)
 }
